@@ -8,8 +8,15 @@ import (
 
 // go test -v homework_test.go
 
-func ToLittleEndian(number uint32) uint32 {
-	return 0 // need to implement
+func ToLittleEndian(number uint32) (res uint32) {
+	res = uint32(uint8(number))
+	res = res << 8
+	res = res | uint32(uint8(number>>8))
+	res = res << 8
+	res = res | uint32(uint8(number>>16))
+	res = res << 8
+	res = res | uint32(uint8(number>>24))
+	return
 }
 
 func TestСonversion(t *testing.T) {
