@@ -2,20 +2,24 @@ package main
 
 import (
 	"testing"
+	"unsafe"
 
 	"github.com/stretchr/testify/assert"
 )
 
 // go test -v homework_test.go
 
-func ToLittleEndian(number uint32) (res uint32) {
-	res = uint32(uint8(number))
-	res = res << 8
-	res = res | uint32(uint8(number>>8))
-	res = res << 8
-	res = res | uint32(uint8(number>>16))
-	res = res << 8
-	res = res | uint32(uint8(number>>24))
+type Int interface {
+	~uint16 | ~uint32 | ~uint64
+}
+
+func ToLittleEndian[T Int](number T) (res T) {
+	for range int(unsafe.Sizeof(number)) - 1 {
+		res |= number & 0xFF
+		number >>= 8
+		res <<= 8
+	}
+	res |= number & 0xFF
 	return
 }
 
