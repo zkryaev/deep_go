@@ -14,15 +14,13 @@ type Val interface {
 }
 
 type CircularQueue[T Val] struct {
-	values      []T
-	begin, end  int
-	full, empty bool
+	values          []T
+	begin, end, len int
 }
 
 func NewCircularQueue[T Val](size int) CircularQueue[T] {
 	return CircularQueue[T]{
 		values: make([]T, size),
-		empty:  true,
 	}
 }
 
@@ -33,10 +31,7 @@ func (q *CircularQueue[T]) Push(value T) bool {
 	q.values[q.end] = value
 	q.end++
 	q.end %= len(q.values)
-	if q.end == q.begin {
-		q.full = true
-	}
-	q.empty = false
+	q.len++
 	return true
 }
 
@@ -46,10 +41,7 @@ func (q *CircularQueue[T]) Pop() bool {
 	}
 	q.begin++
 	q.begin %= len(q.values)
-	if q.end == q.begin {
-		q.empty = true
-	}
-	q.full = false
+	q.len--
 	return true
 }
 
@@ -71,11 +63,11 @@ func (q *CircularQueue[T]) Back() T {
 }
 
 func (q *CircularQueue[T]) Empty() bool {
-	return q.empty
+	return q.len == 0
 }
 
 func (q *CircularQueue[T]) Full() bool {
-	return q.full
+	return q.len == len(q.values)
 }
 
 func TestCircularQueue(t *testing.T) {
