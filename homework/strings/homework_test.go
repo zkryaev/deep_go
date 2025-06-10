@@ -2,6 +2,7 @@ package main
 
 import (
 	"reflect"
+	"runtime"
 	"testing"
 	"unsafe"
 
@@ -14,10 +15,14 @@ type COWBuffer struct {
 }
 
 func NewCOWBuffer(data []byte) COWBuffer {
-	return COWBuffer{
+	buf := &COWBuffer{
 		data: data,
 		refs: new(int),
 	}
+	runtime.SetFinalizer(buf, func(b *COWBuffer) {
+		b.Close()
+	})
+	return *buf
 }
 
 func (b *COWBuffer) Clone() COWBuffer {
@@ -29,7 +34,9 @@ func (b *COWBuffer) Clone() COWBuffer {
 }
 
 func (b *COWBuffer) Close() {
-	*(b.refs)--
+	if *(b.refs) > 0 {
+		*(b.refs)--
+	}
 }
 
 func (b *COWBuffer) Update(index int, value byte) bool {
